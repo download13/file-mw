@@ -1,11 +1,11 @@
 {
   "name": "file-mw",
   "description": "File serving middleware",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "author": "download <download333@gmail.com>",
   "main": "file-mw.js",
   "scripts": {
-    "test": ""
+    "test": "mocha"
   },
   "repository": {
     "type": "git",

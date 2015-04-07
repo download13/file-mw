@@ -73,4 +73,12 @@ function toUrlFormat(path) {
 
 module.exports = createDirectoryServer;
 
+createDirectoryServer.createFileHandler = function(file, opts) {
+	if(typeof file === 'string') {
+		file = new ServableFile(ensureAbsolute(file), opts);
+	}
+
+	return createFileHandler(file);
+};
+
 // TODO: Other ways of creating server

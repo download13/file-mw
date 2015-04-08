@@ -8,8 +8,8 @@ var path = require('path');
 
 var readdir = require('readdir');
 
-var createDirectoryServer = require('../file-mw');
-var createFileServer = createDirectoryServer.createFileServer;
+var createDirectoryHandler = require('../file-mw');
+var createFileHandler = createDirectoryHandler.createFileHandler;
 
 // TODO
 /*
@@ -51,16 +51,19 @@ readdir.readSync(FILES_DIR)
 });
 
 
-//var serverSingleFile = createFileServer(__dirname + '/files/xhr.js', {watch: false, buffer: true});
 
-//var serverBuffered = createDirectoryServer(FILES_DIR, {buffer: true});
+//
+
+//var serverBuffered = createDirectoryHandler(FILES_DIR, {buffer: true});
 //var serverWatched = createFileServer(FILES_DIR, {watch: true}); // TODO
 
-xdescribe('createFileServer', function() { // TODO: Will we need this given other tests? or more for buffered, not, watched
+describe('createFileHandler', function() { // TODO: Will we need this given other tests? or more for buffered, not, watched
+	var server = createFileHandler(FILES_DIR + '/xhr.js', {watch: false, buffer: true});
+
 	it('should send a javascript file', function(done) {
 		var file = files['xhr.js'];
 
-		request(serverSingleFile)
+		request(server)
 			.get('/xhr.js/fd')
 			.expect('Content-Type', 'application/javascript')
 			.expect('Content-Length', file.stat.size)
@@ -70,8 +73,8 @@ xdescribe('createFileServer', function() { // TODO: Will we need this given othe
 	});
 });
 
-describe('createDirectoryServer(buffer: false)', function() {
-	var server = createDirectoryServer(FILES_DIR, {buffer: false});
+describe('createDirectoryHandler(buffer: false)', function() {
+	var server = createDirectoryHandler(FILES_DIR, {buffer: false});
 
 	it('should serve index.html', function(done) {
 		var file = files['index.html'];

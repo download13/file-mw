@@ -101,9 +101,11 @@ describe('createFileHandler', function() { // TODO: Will we need this given othe
 				.get('/changeable.txt')
 				.expect('Content-Type', 'text/plain')
 				.expect(200, 'newstuff')
-				.end(done);
+				.end(function(err) {
+					fs.writeFileSync(file.path, 'something different');
 
-			fs.writeFileSync(file.path, 'something different');
+					done(err);
+				});
 		});
 	});
 });

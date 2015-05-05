@@ -2,7 +2,7 @@ var assert = require('assert');
 
 var streamToString = require('stream-to-string');
 
-var ServableFile = require('../servable-file');
+var ServableFile = require('../lib/servable-file');
 
 
 var FILE_PATH = __dirname + '/files/comment.svg';

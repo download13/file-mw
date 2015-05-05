@@ -8,7 +8,7 @@ var path = require('path');
 
 var readdir = require('readdir');
 
-var createDirectoryHandler = require('../file-mw');
+var createDirectoryHandler = require('../lib/file-mw');
 var createFileHandler = createDirectoryHandler.createFileHandler;
 
 // TODO
@@ -37,7 +37,10 @@ Also note possible changes to logic for:
 
 
 // TODO: Tests, single file, blob of multiple, multiple blobs, directory, blob of dirs, blob or dirs and files
+
 var FILES_DIR = __dirname + '/files';
+
+fs.writeFileSync(FILES_DIR + '/changeable.txt', 'something different');
 
 var files = {};
 
@@ -52,35 +55,70 @@ readdir.readSync(FILES_DIR)
 
 
 
-//
-
 //var serverBuffered = createDirectoryHandler(FILES_DIR, {buffer: true});
 //var serverWatched = createFileServer(FILES_DIR, {watch: true}); // TODO
 
 describe('createFileHandler', function() { // TODO: Will we need this given other tests? or more for buffered, not, watched
-	var server = createFileHandler(FILES_DIR + '/xhr.js', {watch: false, buffer: true});
+	describe('#watch:false', function() {
+		var server;
 
-	it('should send a javascript file', function(done) {
-		var file = files['xhr.js'];
+		it('should be created without errors', function() {
+			server = createFileHandler(FILES_DIR + '/xhr.js', {watch: false, buffer: true});
+		});
 
-		request(server)
-			.get('/xhr.js/fd')
-			.expect('Content-Type', 'application/javascript')
-			.expect('Content-Length', file.stat.size)
-			.expect('Last-Modified', file.stat.mtime.toUTCString())
-			.expect(200)
-			.end(done);
+		it('should send a javascript file', function(done) {
+			var file = files['xhr.js'];
+
+			request(server)
+				.get('/xhr.js/fd')
+				.expect('Content-Type', 'application/javascript')
+				.expect('Content-Length', file.stat.size)
+				.expect('Last-Modified', file.stat.mtime.toUTCString())
+				.expect(200)
+				.end(done);
+		});
+
+		// TODO: test that it won't update when changed
+	});
+
+	describe('#watch:true', function() {
+		var server;
+
+		var file = files['changeable.txt'];
+
+		it('should be created without errors', function() {
+			server = createFileHandler(FILES_DIR + '/changeable.txt', {watch: true});
+		});
+
+		it('should be able to get changed file contents', function(done) {
+			fs.writeFileSync(file.path, 'newstuff');
+
+			setTimeout(done, 500);
+		});
+
+		it('should have changed contents', function(done) {
+			request(server)
+				.get('/changeable.txt')
+				.expect('Content-Type', 'text/plain')
+				.expect(200, 'newstuff')
+				.end(function(err) {
+					fs.writeFileSync(file.path, 'something different');
+
+					done(err);
+				});
+		});
 	});
 });
 
 describe('createDirectoryHandler(buffer: false)', function() {
-	var server = createDirectoryHandler(FILES_DIR, {buffer: false});
+	var server = createDirectoryHandler(FILES_DIR, {buffer: false, cacheLevel: 'public', cacheSeconds: '30'});
 
 	it('should serve index.html', function(done) {
 		var file = files['index.html'];
 
 		request(server)
 			.get('/index.html')
+			.expect('Cache-Control', 'public, max-age=30')
 			.expect('Content-Type', 'text/html')
 			.expect('Content-Length', file.stat.size)
 			.expect('Last-Modified', file.stat.mtime.toUTCString())
@@ -170,76 +208,6 @@ describe('createDirectoryHandler(buffer: false)', function() {
 			// TODO: range head request
 			.expect(200)
 			.expect('')
-			.end(done);
-	});
-});
-
-
-xdescribe('createServer', function() {
-
-	// TODO: Watched
-	xit('should be able to get changed file contents', function(done) {
-		fs.writeFileSync(filename1, 'newstuff');
-
-		setTimeout(done, 200);
-	});
-
-	xit('should have changed contents', function(done) {
-		request(testfile1.serve)
-			.get('/')
-			.expect('Content-Type', 'text/plain')
-			.expect('Content-Length', 8)
-			.expect(200)
-			.end(done);
-	});
-
-	xit('should detect a deleted file', function(done) {
-		fs.unlinkSync(filename1);
-
-		setTimeout(done, 200);
-	});
-
-	xit('should return 404 for a deleted file', function(done) {
-		request(testfile1.serve)
-			.get('/')
-			.expect(404)
-			.end(done);
-	});
-
-	xit('should serve a css file with the right cache-control header', function(done) {
-		request(testfile2.serve)
-			.get('/')
-			.expect('Content-Type', 'text/css')
-			.expect('Content-Length', CONTENTS_2.length)
-			.expect('Cache-Control', 'public, max-age=300')
-			.expect(200)
-			.end(done);
-	});
-
-	xit('should be able to get changed file contents to compressed data', function(done) {
-		fs.writeFileSync(filename1, COMPRESSABLE_CONTENTS);
-
-		setTimeout(done, 200);
-	});
-
-	xit('should send compressed contents if supported', function(done) {
-		request(testfile1.serve)
-			.get('/')
-			.set('Accept-Encoding', 'deflate, gzip')
-			.expect('Content-Type', 'text/plain')
-			.expect('Content-Length', COMPRESSABLE_CONTENTS_GZIPPED_SIZE)
-			.expect('Content-Encoding', 'gzip')
-			.expect(200)
-			.end(done);
-	});
-
-	xit('should not send compressed contents if not supported', function(done) {
-		request(testfile1.serve)
-			.get('/')
-			.set('Accept-Encoding', null)
-			.expect('Content-Type', 'text/plain')
-			.expect('Content-Length', COMPRESSABLE_CONTENTS.length)
-			.expect(200)
 			.end(done);
 	});
 });

@@ -1,4 +1,4 @@
-var sw = require('simpleware');
+var createRouter = require('http-router-fn');
 
 var pathlib = require('path');
 
@@ -18,7 +18,7 @@ function createDirectoryServer(dirPath, opts) {
 		buffer: false
 	}, opts);
 
-	var router = sw.createRouter();
+	var router = createRouter();
 
 	dirPath = ensureAbsolute(dirPath);
 

@@ -23,5 +23,6 @@ The `options` object can have the following properties:
 * cacheSeconds - `optional`; The value appended to 'max-age=' in the `Cache-Control` header.
 * buffer - `default false`; If true the file contents should be buffered into memory instead of being streamed from the filesystem.
 * watch - `default false`; If true the file will be watched for changes and the updated file will be served.
+* toUrlFormat - `default implementation`; A function that takes a filesystem path as a parameter and returns a URL path for that file.
 
 ## License: MIT

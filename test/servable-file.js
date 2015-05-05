@@ -73,6 +73,19 @@ describe('ServableFile(buffer: true)', function() {
 	it('must have contents', function() {
 		assert(file.contents);
 	});
+
+	it('must have createReadStream', function(done) {
+		streamToString(file.createReadStream(), function(err, contents) {
+			if(err) {
+				done(err);
+				return;
+			}
+
+			assert.equal(contents, FILE_CONTENTS);
+
+			done();
+		});
+	});
 });
 
 

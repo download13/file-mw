@@ -2,7 +2,7 @@ var assert = require('assert');
 
 var streamToString = require('stream-to-string');
 
-var ServableFile = require('../lib/servable-file');
+var ServableFile = require('../lib/models/servable-file');
 
 
 var FILE_PATH = __dirname + '/files/comment.svg';
@@ -26,16 +26,24 @@ describe('ServableFile', function() {
 		}, 200);
 	});
 
-	it('must have stat', function() {
-		assert(file.stat);
-	});
-
-	it('must have lastModified', function() {
-		assert(file.lastModified);
+	it('must have cache settings', function() {
+		assert(file.cache);
 	});
 
 	it('must have contentType', function() {
 		assert(file.contentType);
+	});
+
+	it('must have contentLength', function() {
+		assert(file.contentLength);
+	});
+
+	it('must have etag', function() {
+		assert(file.etag);
+	});
+
+	it('must have lastModified', function() {
+		assert(file.lastModified);
 	});
 
 	it('must have createReadStream', function(done) {
@@ -68,10 +76,6 @@ describe('ServableFile(buffer: true)', function() {
 
 			done();
 		}, 200);
-	});
-
-	it('must have contents', function() {
-		assert(file.contents);
 	});
 
 	it('must have createReadStream', function(done) {
